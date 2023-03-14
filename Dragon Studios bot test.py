@@ -1,10 +1,8 @@
-import os
-import json
 import discord
 from discord.utils import get
 from discord.ext import commands
 
-TOKEN = 
+TOKEN = 'fiaosufoiawtpkasopitaopskipgkjaiotogpkjiafa-ptiajwtaspojt]'
 GUILD = '1085193543905181737'
 EMOJI_BELL = '🔔'
 EMOJI_GIVEAWAY = '🎉'
