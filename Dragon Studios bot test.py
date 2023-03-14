@@ -15,11 +15,11 @@ with open('settings.json', 'r') as token_file:
     data = json.load(token_file)
 TOKEN = data.get('token', None)
 
-GUILD = '1073348814573928468'
+GUILD = ''
 EMOJI_BELL = '🔔'
 EMOJI_GIVEAWAY = '🎉'
-ROLE_BELL_ID = 1073682987482366014
-ROLE_GIVEAWAY_ID = 1073683339841638410
+ROLE_BELL_ID = 
+ROLE_GIVEAWAY_ID = 
 
 intents = discord.Intents.default()
 intents.message_content = True
