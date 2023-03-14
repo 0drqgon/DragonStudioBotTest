@@ -2,15 +2,13 @@ import discord
 from discord.utils import get
 from discord.ext import commands
 
-TOKEN = 'fiaosufoiawtpkasopitaopskipgkjaiotogpkjiafa-ptiajwtaspojt]'
+TOKEN = 'lkajhgfjahstjhtasonkaohsj'
 GUILD = '1085193543905181737'
 EMOJI_BELL = '🔔'
 EMOJI_GIVEAWAY = '🎉'
 ROLE_BELL_ID = 1085193543905181740
 ROLE_GIVEAWAY_ID = 1085193543905181739
-TICKET_CATEGORY_NAME = "Support"  # Name of the ticket category
-TICKET_EMOJIS = ["🎫", "🆘"]
-TICKET_CHANNELS = []
+
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -25,68 +23,61 @@ async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
 
-# Ticket system functionality
-@client.event
-async def on_raw_reaction_add(payload):
-    if str(payload.emoji) in TICKET_EMOJIS:
-        channel = client.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        user = await client.fetch_user(payload.user_id)
-        if str(payload.emoji) == ":ticket:":
-            category = discord.utils.get(channel.guild.categories, name=TICKET_CATEGORY_NAME)
-            if not category:
-                category = await channel.guild.create_category(TICKET_CATEGORY_NAME)
-            ticket_name = f"{user.name}-ticket"
-            ticket_channel = await category.create_text_channel(name=ticket_name)
-            TICKET_CHANNELS.append(ticket_channel)
-            await ticket_channel.set_permissions(user, read_messages=True, send_messages=True)
-            await message.remove_reaction(payload.emoji, user)
-            ticket_embed = discord.Embed(
-                title=f"Ticket for {user.name}", description="Please state your issue.", color=0x00ff00
-            )
-            await ticket_channel.send(embed=ticket_embed)
-        elif str(payload.emoji) == ":sos:":
-            category = discord.utils.get(channel.guild.categories, name=TICKET_CATEGORY_NAME)
-            if category:
-                for channel in category.channels:
-                    if channel.name.startswith(user.name):
-                        await channel.delete()
-                        TICKET_CHANNELS.remove(channel)
+# Define the category where the ticket channels will be created
+category_id = 1085193544362364995
 
-@client.event
-async def on_raw_reaction_remove(payload):
-    pass
+# Define the message to display in the ticket creation embed
+ticket_message = "Click the button below to create a new ticket."
 
-# Command to start a new ticket channel with a button
+# Define the emoji to use for the ticket button
+ticket_emoji = '🎫'
+
+# Define the color of the ticket creation embed
+ticket_color = discord.Color.blue()
+
+# Define the role that will be able to view the ticket channels
+support_role_id = 1085193543926173706
+
+# Define the function that will create the ticket channel
+async def create_ticket_channel(guild, member):
+    overwrites = {
+        guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        guild.me: discord.PermissionOverwrite(read_messages=True),
+        member: discord.PermissionOverwrite(read_messages=True),
+        guild.get_role(support_role_id): discord.PermissionOverwrite(read_messages=True)
+    }
+    channel = await guild.create_text_channel(f'ticket-{member.display_name}', overwrites=overwrites, category=guild.get_channel(category_id))
+    return channel
+
+# Define the function that will create the ticket creation embed
+def create_ticket_embed():
+    embed = discord.Embed(title="Support Ticket", description=ticket_message, color=ticket_color)
+    return embed
+
+# Define the function that will handle the ticket button click
+async def handle_ticket_button(interaction):
+    member = interaction.author
+    guild = interaction.guild
+    channel = await create_ticket_channel(guild, member)
+    await interaction.message.delete()
+    await member.send(f"Your ticket has been created in {channel.mention}.")
+
+# Define the function that will add the ticket button to the ticket creation embed
+async def add_ticket_button(embed):
+    button = discord.Button(label="Create Ticket", emoji=ticket_emoji, style=discord.ButtonStyle.blurple)
+    button.callback = handle_ticket_button
+    embed.set_footer(text="Click the button below to create a new ticket.")
+    embed.add_field(name="Instructions", value=f"Click the {ticket_emoji} button to create a new ticket.")
+    return embed
+
+# Define the command that will send the ticket creation embed
 @client.command()
-async def newticket(ctx):
-    if ctx.message.content == "!newticket":
-        category = discord.utils.get(ctx.guild.categories, name=TICKET_CATEGORY_NAME)
-        if not category:
-            category = await ctx.guild.create_category(TICKET_CATEGORY_NAME)
+async def ticket(ctx):
+    embed = create_ticket_embed()
+    embed = await add_ticket_button(embed)
+    message = await ctx.send(embed=embed)
 
-        ticket_name = f"{ctx.author.name}-ticket"
-        ticket_channel = await category.create_text_channel(name=ticket_name)
-        TICKET_CHANNELS.append(ticket_channel)
-        await ticket_channel.set_permissions(ctx.author, read_messages=True, send_messages=True)
-
-        ticket_embed = discord.Embed(title=f"Ticket for {ctx.author.name}", description="Please state your issue.", color=0x00ff00)
-        message = await ctx.send(
-        "Click the button below to start a new ticket channel.",
-        components=[
-            [discord.ui.Button(style=discord.ButtonStyle.green, label="Open ticket", custom_id="new_ticket")]
-        ]
-    )
-
-    while True:
-        interaction = await client.wait_for("button_click")
-        if interaction.custom_id == "new_ticket":
-            await message.delete()
-            await interaction.respond(type=6)
-            await ticket_channel.send(embed=ticket_embed)
-            break
-
-
+# Reaction Role function
 @client.event
 async def on_raw_reaction_add(payload):
     if payload.emoji.name == EMOJI_BELL:
