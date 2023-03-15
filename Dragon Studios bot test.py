@@ -38,7 +38,7 @@ ticket_color = discord.Color.blue()
 # the role that will be able to view the ticket channels
 support_role_id = 1085193543926173706
 
-#  the function that will create the ticket channel
+# the function that will create the ticket channel
 async def create_ticket_channel(guild, member):
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
