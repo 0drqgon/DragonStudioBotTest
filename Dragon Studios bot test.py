@@ -23,22 +23,22 @@ async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
 
-# Define the category where the ticket channels will be created
+# Category
 category_id = 1085193544362364995
 
-# Define the message to display in the ticket creation embed
+# message in the ticket creation embed
 ticket_message = "Click the button below to create a new ticket."
 
-# Define the emoji to use for the ticket button
+# emoji for the ticket button
 ticket_emoji = '🎫'
 
-# Define the color of the ticket creation embed
+# color of the ticket creation embed
 ticket_color = discord.Color.blue()
 
-# Define the role that will be able to view the ticket channels
+# the role that will be able to view the ticket channels
 support_role_id = 1085193543926173706
 
-# Define the function that will create the ticket channel
+#  the function that will create the ticket channel
 async def create_ticket_channel(guild, member):
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -49,12 +49,12 @@ async def create_ticket_channel(guild, member):
     channel = await guild.create_text_channel(f'ticket-{member.display_name}', overwrites=overwrites, category=guild.get_channel(category_id))
     return channel
 
-# Define the function that will create the ticket creation embed
+# the function that will create the ticket creation embed
 def create_ticket_embed():
     embed = discord.Embed(title="Support Ticket", description=ticket_message, color=ticket_color)
     return embed
 
-# Define the function that will handle the ticket button click
+# the function that will handle the ticket button click
 async def handle_ticket_button(interaction):
     member = interaction.author
     guild = interaction.guild
@@ -62,7 +62,7 @@ async def handle_ticket_button(interaction):
     await interaction.message.delete()
     await member.send(f"Your ticket has been created in {channel.mention}.")
 
-# Define the function that will add the ticket button to the ticket creation embed
+# the function that will add the ticket button to the ticket creation embed
 async def add_ticket_button(embed):
     button = discord.Button(label="Create Ticket", emoji=ticket_emoji, style=discord.ButtonStyle.blurple)
     button.callback = handle_ticket_button
@@ -70,7 +70,7 @@ async def add_ticket_button(embed):
     embed.add_field(name="Instructions", value=f"Click the {ticket_emoji} button to create a new ticket.")
     return embed
 
-# Define the command that will send the ticket creation embed
+# the command that will send the ticket creation embed
 @client.command()
 async def ticket(ctx):
     embed = create_ticket_embed()
